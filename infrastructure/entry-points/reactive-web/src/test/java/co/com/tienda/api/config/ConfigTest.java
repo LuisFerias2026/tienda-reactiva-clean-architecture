@@ -7,10 +7,11 @@ import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import co.com.tienda.api.config.ApiTestConfig;
 
 @ContextConfiguration(classes = {ApiRest.class})
 @WebFluxTest
-@Import({CorsConfig.class, SecurityHeadersConfig.class})
+@Import({CorsConfig.class, SecurityHeadersConfig.class, ApiTestConfig.class})
 class ConfigTest {
 
     @Autowired
@@ -19,7 +20,7 @@ class ConfigTest {
     @Test
     void corsConfigurationShouldAllowOrigins() {
         webTestClient.get()
-                .uri("/api/usecase/path")
+                .uri("/api/products")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Security-Policy",
