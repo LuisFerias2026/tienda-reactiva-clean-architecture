@@ -1,0 +1,47 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: "TiendaReactiva"
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:tienda}
+    password: ${RABBITMQ_PASSWORD:tienda}
+    virtual-host: ${RABBITMQ_VHOST:/}
+app:
+  async:
+    app:
+      app-name: ${spring.application.name}
+      listen-replies: false
+  devtools:
+    add-properties: false
+  h2:
+    console:
+      enabled: true
+      path: "/h2"
+  profiles:
+    include: null
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:15432}/${DB_NAME:tienda}
+    username: ${DB_USER:tienda}
+    password: ${DB_PASSWORD:tienda}
+adapters:
+  r2dbc:
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:15432}
+    database: ${DB_NAME:tienda}
+    schema: public
+    username: ${DB_USER:tienda}
+    password: ${DB_PASSWORD:tienda}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
