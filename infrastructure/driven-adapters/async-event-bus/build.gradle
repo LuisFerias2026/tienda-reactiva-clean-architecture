@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':model')
+    implementation 'io.cloudevents:cloudevents-core:5.0.0'
+    implementation 'org.reactivecommons:async-commons-rabbit-starter:7.3.1'
+    implementation 'org.springframework:spring-context'
+}
