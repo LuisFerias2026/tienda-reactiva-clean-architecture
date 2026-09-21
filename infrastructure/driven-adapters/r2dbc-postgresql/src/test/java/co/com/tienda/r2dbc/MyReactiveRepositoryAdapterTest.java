@@ -59,10 +59,13 @@ class MyReactiveRepositoryAdapterTest {
     @Test
     void mustFindByExample() {
         ProductData data = ProductData.builder().id("1").name("Cafe").build();
+        Product product = Product.builder().name("Cafe").build();
+        ProductData exampleData = ProductData.builder().name("Cafe").build();
+        when(mapper.map(product, ProductData.class)).thenReturn(exampleData);
         when(repository.findAll(any(Example.class))).thenReturn(Flux.just(data));
         when(mapper.map(data, Product.class)).thenReturn(Product.builder().id("1").name("Cafe").build());
 
-        Flux<Product> result = repositoryAdapter.findByExample(Product.builder().name("Cafe").build());
+        Flux<Product> result = repositoryAdapter.findByExample(product);
 
         StepVerifier.create(result)
             .expectNextMatches(value -> value.getName().equals("Cafe"))
