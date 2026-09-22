@@ -1,6 +1,7 @@
 package co.com.tienda.api.config;
 
-import co.com.tienda.api.ApiRest;
+import co.com.tienda.api.Handler;
+import co.com.tienda.api.RouterRest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@ContextConfiguration(classes = {ApiRest.class})
+@ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
 @Import({CorsConfig.class, SecurityHeadersConfig.class, ApiTestConfig.class})
 class ConfigTest {

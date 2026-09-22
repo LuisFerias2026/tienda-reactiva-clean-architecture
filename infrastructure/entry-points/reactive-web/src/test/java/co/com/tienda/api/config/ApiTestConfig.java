@@ -1,6 +1,8 @@
 package co.com.tienda.api.config;
 
 import co.com.tienda.usecase.product.ProductUseCase;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -11,5 +13,10 @@ public class ApiTestConfig {
     @Bean
     ProductUseCase productUseCase() {
         return mock(ProductUseCase.class);
+    }
+
+    @Bean
+    Validator validator() {
+        return Validation.buildDefaultValidatorFactory().getValidator();
     }
 }

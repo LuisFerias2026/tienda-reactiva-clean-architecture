@@ -9,11 +9,6 @@ spring:
     username: ${RABBITMQ_USER:tienda}
     password: ${RABBITMQ_PASSWORD:tienda}
     virtual-host: ${RABBITMQ_VHOST:/}
-app:
-  async:
-    app:
-      app-name: ${spring.application.name}
-      listen-replies: false
   devtools:
     add-properties: false
   h2:
@@ -26,6 +21,11 @@ app:
     url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:15432}/${DB_NAME:tienda}
     username: ${DB_USER:tienda}
     password: ${DB_PASSWORD:tienda}
+app:
+  async:
+    app:
+      app-name: ${spring.application.name}
+      listen-replies: false
 adapters:
   r2dbc:
     host: ${DB_HOST:localhost}
