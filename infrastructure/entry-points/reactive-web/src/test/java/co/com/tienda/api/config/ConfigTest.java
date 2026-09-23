@@ -8,6 +8,11 @@ import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.junit.jupiter.api.BeforeEach;
+import reactor.core.publisher.Flux;
+import co.com.tienda.usecase.product.ProductUseCase;
+import org.springframework.beans.factory.annotation.Qualifier;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
@@ -16,6 +21,14 @@ class ConfigTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @Autowired
+    private ProductUseCase productUseCase;
+
+    @BeforeEach
+    void setupMocks() {
+        when(productUseCase.findAll()).thenReturn(Flux.empty());
+    }
 
     @Test
     void corsConfigurationShouldAllowOrigins() {

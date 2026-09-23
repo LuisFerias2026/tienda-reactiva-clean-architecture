@@ -8,6 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.data.r2dbc.core.ReactiveInsertOperation;
+import org.springframework.data.relational.core.sql.SqlIdentifier;
 import org.springframework.data.domain.Example;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +26,9 @@ class MyReactiveRepositoryAdapterTest {
 
     @Mock
     MyReactiveRepository repository;
+
+    @Mock
+    R2dbcEntityTemplate template;
 
     @Mock
     ObjectMapper mapper;
@@ -77,6 +83,7 @@ class MyReactiveRepositoryAdapterTest {
         Product product = Product.builder().id("1").name("Cafe").build();
         ProductData data = ProductData.builder().id("1").name("Cafe").build();
         when(mapper.map(product, ProductData.class)).thenReturn(data);
+        when(repository.existsById("1")).thenReturn(Mono.just(true));
         when(repository.save(data)).thenReturn(Mono.just(data));
         when(mapper.map(data, Product.class)).thenReturn(product);
 
@@ -84,6 +91,38 @@ class MyReactiveRepositoryAdapterTest {
 
         StepVerifier.create(result)
             .expectNextMatches(value -> value.getName().equals("Cafe"))
+                .verifyComplete();
+    }
+
+    @Test
+    void mustInsertValueWhenNotExists() {
+        Product product = Product.builder().id("2").name("Te").build();
+        ProductData data = ProductData.builder().id("2").name("Te").build();
+        when(mapper.map(product, ProductData.class)).thenReturn(data);
+        when(repository.existsById("2")).thenReturn(Mono.just(false));
+        ReactiveInsertOperation.ReactiveInsert<ProductData> insertOp = new ReactiveInsertOperation.ReactiveInsert<>() {
+            @Override
+            public ReactiveInsertOperation.TerminatingInsert<ProductData> into(String table) {
+                return this;
+            }
+
+            @Override
+            public ReactiveInsertOperation.TerminatingInsert<ProductData> into(SqlIdentifier table) {
+                return this;
+            }
+
+            @Override
+            public Mono<ProductData> using(ProductData value) {
+                return Mono.just(value);
+            }
+        };
+        when(template.insert(ProductData.class)).thenReturn(insertOp);
+        when(mapper.map(data, Product.class)).thenReturn(product);
+
+        Mono<Product> result = repositoryAdapter.save(product);
+
+        StepVerifier.create(result)
+            .expectNextMatches(value -> value.getName().equals("Te"))
                 .verifyComplete();
     }
 }
