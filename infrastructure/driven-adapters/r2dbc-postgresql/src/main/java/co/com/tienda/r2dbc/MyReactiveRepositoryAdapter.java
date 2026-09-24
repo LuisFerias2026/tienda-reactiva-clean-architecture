@@ -25,8 +25,13 @@ public class MyReactiveRepositoryAdapter implements ProductRepository {
 
     @Override
     public Mono<Product> save(Product product) {
-        ProductData data = toData(product);
-        return repository.existsById(data.getId())
+        ProductData data = ProductData.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .build();
+        return repository.existsById(product.getId())
                 .flatMap(exists -> exists
                         ? repository.save(data)
                         : template.insert(ProductData.class).using(data))
