@@ -1,5 +1,6 @@
 package co.com.tienda.api.config;
 
+import co.com.tienda.api.dto.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.webflux.autoconfigure.error.AbstractErrorWebExceptionHandler;
@@ -16,10 +17,6 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.time.OffsetDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Component
 @Order(-2)
@@ -44,30 +41,17 @@ public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHan
         HttpStatus status = resolveStatus(error);
         return ServerResponse.status(status)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(buildBody(request, error, status));
+                .bodyValue(ErrorResponse.of(status, request.path(), resolveMessage(error)));
     }
 
     private HttpStatus resolveStatus(Throwable error) {
-        if (error instanceof ConstraintViolationException) {
+        if (error instanceof ConstraintViolationException || error instanceof IllegalArgumentException) {
             return HttpStatus.BAD_REQUEST;
         }
         if (error instanceof IllegalStateException) {
             return HttpStatus.CONFLICT;
         }
-        if (error instanceof IllegalArgumentException) {
-            return HttpStatus.NOT_FOUND;
-        }
         return HttpStatus.INTERNAL_SERVER_ERROR;
-    }
-
-    private Map<String, Object> buildBody(ServerRequest request, Throwable error, HttpStatus status) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", OffsetDateTime.now().toString());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("path", request.path());
-        body.put("message", resolveMessage(error));
-        return body;
     }
 
     private Object resolveMessage(Throwable error) {

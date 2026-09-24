@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.r2dbc.core.ReactiveInsertOperation;
 import org.springframework.data.relational.core.sql.SqlIdentifier;
@@ -30,16 +29,10 @@ class MyReactiveRepositoryAdapterTest {
     @Mock
     R2dbcEntityTemplate template;
 
-    @Mock
-    ObjectMapper mapper;
-
     @Test
     void mustFindValueById() {
-
         ProductData data = ProductData.builder().id("1").name("Cafe").build();
-        Product product = Product.builder().id("1").name("Cafe").build();
         when(repository.findById("1")).thenReturn(Mono.just(data));
-        when(mapper.map(data, Product.class)).thenReturn(product);
 
         Mono<Product> result = repositoryAdapter.findById("1");
 
@@ -52,7 +45,6 @@ class MyReactiveRepositoryAdapterTest {
     void mustFindAllValues() {
         ProductData data = ProductData.builder().id("1").name("Cafe").build();
         when(repository.findAll()).thenReturn(Flux.just(data));
-        when(mapper.map(data, Product.class)).thenReturn(Product.builder().id("1").name("Cafe").build());
 
         Flux<Product> result = repositoryAdapter.findAll();
 
@@ -66,10 +58,7 @@ class MyReactiveRepositoryAdapterTest {
     void mustFindByExample() {
         ProductData data = ProductData.builder().id("1").name("Cafe").build();
         Product product = Product.builder().name("Cafe").build();
-        ProductData exampleData = ProductData.builder().name("Cafe").build();
-        when(mapper.map(product, ProductData.class)).thenReturn(exampleData);
         when(repository.findAll(any(Example.class))).thenReturn(Flux.just(data));
-        when(mapper.map(data, Product.class)).thenReturn(Product.builder().id("1").name("Cafe").build());
 
         Flux<Product> result = repositoryAdapter.findByExample(product);
 
@@ -81,11 +70,8 @@ class MyReactiveRepositoryAdapterTest {
     @Test
     void mustSaveValue() {
         Product product = Product.builder().id("1").name("Cafe").build();
-        ProductData data = ProductData.builder().id("1").name("Cafe").build();
-        when(mapper.map(product, ProductData.class)).thenReturn(data);
         when(repository.existsById("1")).thenReturn(Mono.just(true));
-        when(repository.save(data)).thenReturn(Mono.just(data));
-        when(mapper.map(data, Product.class)).thenReturn(product);
+        when(repository.save(any(ProductData.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         Mono<Product> result = repositoryAdapter.save(product);
 
@@ -97,8 +83,6 @@ class MyReactiveRepositoryAdapterTest {
     @Test
     void mustInsertValueWhenNotExists() {
         Product product = Product.builder().id("2").name("Te").build();
-        ProductData data = ProductData.builder().id("2").name("Te").build();
-        when(mapper.map(product, ProductData.class)).thenReturn(data);
         when(repository.existsById("2")).thenReturn(Mono.just(false));
         ReactiveInsertOperation.ReactiveInsert<ProductData> insertOp = new ReactiveInsertOperation.ReactiveInsert<>() {
             @Override
@@ -117,7 +101,6 @@ class MyReactiveRepositoryAdapterTest {
             }
         };
         when(template.insert(ProductData.class)).thenReturn(insertOp);
-        when(mapper.map(data, Product.class)).thenReturn(product);
 
         Mono<Product> result = repositoryAdapter.save(product);
 

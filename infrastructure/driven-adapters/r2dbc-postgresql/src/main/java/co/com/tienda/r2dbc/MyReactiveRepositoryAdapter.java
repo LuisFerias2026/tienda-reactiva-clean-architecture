@@ -6,7 +6,6 @@ import co.com.tienda.r2dbc.entity.ProductData;
 import io.r2dbc.spi.R2dbcException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
-import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,14 +16,11 @@ public class MyReactiveRepositoryAdapter implements ProductRepository {
 
     private final MyReactiveRepository repository;
     private final R2dbcEntityTemplate template;
-    private final ObjectMapper mapper;
 
     public MyReactiveRepositoryAdapter(MyReactiveRepository repository,
-                                       R2dbcEntityTemplate template,
-                                       ObjectMapper mapper) {
+                                       R2dbcEntityTemplate template) {
         this.repository = repository;
         this.template = template;
-        this.mapper = mapper;
     }
 
     @Override
@@ -69,10 +65,20 @@ public class MyReactiveRepositoryAdapter implements ProductRepository {
     }
 
     private ProductData toData(Product product) {
-        return mapper.map(product, ProductData.class);
+        return ProductData.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .build();
     }
 
     private Product toEntity(ProductData data) {
-        return mapper.map(data, Product.class);
+        return Product.builder()
+                .id(data.getId())
+                .name(data.getName())
+                .price(data.getPrice())
+                .stock(data.getStock())
+                .build();
     }
 }
